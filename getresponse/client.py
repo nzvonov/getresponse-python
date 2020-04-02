@@ -1,11 +1,17 @@
+# -*- encoding: utf-8 -*-
+from __future__ import unicode_literals
+
 import logging
-import requests
+
 from getresponse.enums import HttpMethod, ObjType
+
+import requests
+
 from .account import AccountManager
 from .campaign import CampaignManager
 from .contact import ContactManager
 from .custom_field import CustomFieldManager
-from .excs import UniquePropertyError, NotFoundError, ValidationError, ForbiddenError
+from .excs import ForbiddenError, NotFoundError, UniquePropertyError, ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -393,6 +399,6 @@ class GetResponse(object):
 
 class GetResponseEnterprise(GetResponse):
     def __init__(self, api_key, api_domain, api_base_url='https://api3.getresponse360.com/v3', **kwargs):
-        super().__init__(api_key, **kwargs)
+        super(GetResponseEnterprise).__init__(api_key, **kwargs)
         self.API_BASE_URL = api_base_url
         self.session.headers.update({'X-Domain': api_domain})

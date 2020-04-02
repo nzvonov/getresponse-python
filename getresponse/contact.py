@@ -1,4 +1,7 @@
-import datetime
+# -*- encoding: utf-8 -*-
+from __future__ import unicode_literals
+
+from dateutil.parser import parse as parse_date
 
 
 class Contact(object):
@@ -54,11 +57,11 @@ class ContactManager(object):
         if 'createdOn' in kwargs:
             created_on = kwargs['createdOn']
             if created_on:
-                contact.created_on = datetime.datetime.strptime(created_on, '%Y-%m-%dT%H:%M:%S%z')
+                contact.created_on = parse_date(created_on)
         if 'changedOn' in kwargs:
             changed_on = kwargs['changedOn']
             if changed_on:
-                contact.changed_on = datetime.datetime.strptime(changed_on, '%Y-%m-%dT%H:%M:%S%z')
+                contact.changed_on = parse_date(changed_on)
         if 'campaign' in kwargs:
             campaign = self.campaign_manager.create(kwargs['campaign'])
             contact.campaign = campaign

@@ -1,4 +1,7 @@
-import datetime
+# -*- encoding: utf-8 -*-
+from __future__ import unicode_literals
+
+from dateutil.parser import parse as parse_date
 
 
 class Campaign(object):
@@ -45,7 +48,7 @@ class CampaignManager(object):
         if 'createdOn' in kwargs:
             created_on = kwargs['createdOn']
             if created_on:
-                campaign.created_on = datetime.datetime.strptime(created_on, '%Y-%m-%dT%H:%M:%S%z')
+                campaign.created_on = parse_date(created_on)
         if 'description' in kwargs:
             campaign.description = kwargs['description']
         if 'confirmation' in kwargs:

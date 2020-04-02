@@ -1,3 +1,7 @@
+# -*- encoding: utf-8 -*-
+from __future__ import unicode_literals
+
+
 class CustomField(object):
     def __init__(self, *args, **kwargs):
         self.id = args[0]
