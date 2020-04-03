@@ -98,6 +98,7 @@ if custom_field:
 ```
 ## Requirements
 - requests
+- python-dateutil
 
 ## Contributing
 We are always grateful for any kind of contribution including but not limited to bug reports, code enhancements, bug fixes, and even functionality suggestions.
