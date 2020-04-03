@@ -36,5 +36,5 @@ class ContactManager(EntityManager):
 
     def _create(self, *args, **kwargs):
         contact = super(ContactManager, self)._create(*args, **kwargs)
-        contact.campaign = self.campaign_manager.create(contact.campaign)
+        contact.campaign = self.campaign_manager.create(**contact.campaign)
         return contact

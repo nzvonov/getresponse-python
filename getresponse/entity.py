@@ -64,7 +64,7 @@ class EntityManager(object):
             setattr(entity, obj_field, field_data)
         return entity
 
-    def create(self, obj):
+    def create(self, **obj):
         return self._create(**obj)
 
     def create_list(self, objs):
