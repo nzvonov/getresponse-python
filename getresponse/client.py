@@ -384,14 +384,17 @@ class GetResponse(object):
             return None
 
     def _create_obj(self, obj_type, data):
+        method = 'create'
+        if isinstance(data, list):
+            method = 'create_list'
         if obj_type == ObjType.ACCOUNT:
-            obj = self.account_manager.create(data)
+            obj = getattr(self.account_manager, method)(data)
         elif obj_type == ObjType.CAMPAIGN:
-            obj = self.campaign_manager.create(data)
+            obj = getattr(self.campaign_manager, method)(data)
         elif obj_type == ObjType.CONTACT:
-            obj = self.contact_manager.create(data)
+            obj = getattr(self.contact_manager, method)(data)
         elif obj_type == ObjType.CUSTOM_FIELD:
-            obj = self.custom_field_manager.create(data)
+            obj = getattr(self.custom_field_manager, method)(data)
         else:
             return data
         return obj

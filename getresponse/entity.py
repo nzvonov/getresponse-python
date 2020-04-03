@@ -65,8 +65,8 @@ class EntityManager(object):
         return entity
 
     def create(self, obj):
-        if isinstance(obj, list):
-            for item in obj:
-                yield self._create(**item)
-        else:
-            yield self._create(**obj)
+        return self._create(**obj)
+
+    def create_list(self, objs):
+        for obj in objs:
+            yield self.create(**obj)
