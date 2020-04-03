@@ -14,9 +14,6 @@ class Entity(object):
         self.name = None
         self.href = None
 
-    def get_name(self):
-        return self.name
-
     def __unicode__(self, *args, **kwargs):
         params = OrderedDict({'id': self.id, 'name': self.get_name()})
         params.update(kwargs)
@@ -29,6 +26,9 @@ class Entity(object):
         except (UnicodeEncodeError, UnicodeDecodeError):
             obj_str = '[Bad Unicode data]'
         return '<{}({})>'.format(self.__class__.__name__, obj_str).encode(encoding='utf-8', errors='strict')
+
+    def get_name(self):
+        return self.name
 
 
 class EntityManager(object):

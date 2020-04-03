@@ -22,11 +22,11 @@ class Account(Entity):
         self.time_format = None
         self.time_zone = None
 
-    def get_name(self):
-        return '{} {}'.format(self.first_name or '', self.last_name or '')
-
     def __unicode__(self, *args, **kwargs):
         return super(Account, self).__unicode__(email=self.email)
+
+    def get_name(self):
+        return '{} {}'.format(self.first_name or '', self.last_name or '')
 
 
 class AccountManager(EntityManager):
