@@ -31,7 +31,6 @@ class EntityManager(object):
     def __get_fields_list(obj):
         obj_fields_list = obj.__dict__.keys()
         obj_fields_list.remove('id')
-        fields_list = []
         splitter = '_'
         for obj_field in obj_fields_list:
             kwargs_field = obj_field
@@ -39,8 +38,7 @@ class EntityManager(object):
                 split_field = obj_field.split(splitter)
                 titled_words = map(lambda word: word.title(), split_field[1:])
                 kwargs_field = ''.join(split_field[:1] + titled_words)
-            fields_list.append((obj_field, kwargs_field))
-        return fields_list
+            yield obj_field, kwargs_field
 
     def create(self, obj):
         if isinstance(obj, list):
@@ -56,12 +54,8 @@ class EntityManager(object):
     def _create(self, *args, **kwargs):
         entity_id = kwargs.get(self.id_field_in_kwargs)
         entity = self.object_class(_id=entity_id)
-        fields_list = self.__get_fields_list(entity)
 
-        test = set(kwargs.keys()).difference(set(field[1] for field in fields_list))
-        print test
-
-        for obj_field, kwargs_field in fields_list:
+        for obj_field, kwargs_field in self.__get_fields_list(entity):
             field_data = kwargs.get(kwargs_field)
             if field_data is not None:
                 if kwargs_field in self.date_fields_in_kwargs:
