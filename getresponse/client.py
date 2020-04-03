@@ -387,17 +387,22 @@ class GetResponse(object):
         method = 'create'
         if isinstance(data, list):
             method = 'create_list'
-        if obj_type == ObjType.ACCOUNT:
-            obj = getattr(self.account_manager, method)(data)
-        elif obj_type == ObjType.CAMPAIGN:
-            obj = getattr(self.campaign_manager, method)(data)
-        elif obj_type == ObjType.CONTACT:
-            obj = getattr(self.contact_manager, method)(data)
-        elif obj_type == ObjType.CUSTOM_FIELD:
-            obj = getattr(self.custom_field_manager, method)(data)
-        else:
+        managers = {
+            ObjType.ACCOUNT: self.account_manager,
+            ObjType.CAMPAIGN: self.campaign_manager,
+            ObjType.CONTACT: self.contact_manager,
+            ObjType.CUSTOM_FIELD: self.custom_field_manager,
+        }
+        manager = managers.get(obj_type)
+
+        if manager is None:
             return data
-        return obj
+
+        create_func = getattr(manager, method)
+        if method == 'create_list':
+            return create_func(data)
+
+        return create_func(**data)
 
 
 class GetResponseEnterprise(GetResponse):
