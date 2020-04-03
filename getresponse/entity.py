@@ -1,20 +1,34 @@
 # -*- encoding: utf-8 -*-
 from __future__ import unicode_literals
 
+from collections import OrderedDict
+
 from dateutil.parser import parse as parse_date
+
+from six import text_type
 
 
 class Entity(object):
     def __init__(self, _id, *args, **kwargs):
         self.id = _id
-        self.href = None
         self.name = None
+        self.href = None
 
     def get_name(self):
         return self.name
 
+    def __unicode__(self, *args, **kwargs):
+        params = OrderedDict({'id': self.id, 'name': self.get_name()})
+        params.update(kwargs)
+        format_str = map(lambda param: "{}='{}'".format(param[0], param[1]), params.items())
+        return ", ".join(format_str)
+
     def __repr__(self):
-        return "<{}(id='{}', name='{}'".format(self.__class__.__name__, self.id, self.get_name())
+        try:
+            obj_str = text_type(self)
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            obj_str = '[Bad Unicode data]'
+        return '<{}({})>'.format(self.__class__.__name__, obj_str).encode(encoding='utf-8', errors='strict')
 
 
 class EntityManager(object):
@@ -23,9 +37,6 @@ class EntityManager(object):
     id_field_in_kwargs = None
     date_fields_in_kwargs = []
     bool_fields_in_kwargs = []
-
-    def __init__(self, *args, **kwargs):
-        super(EntityManager, self).__init__(*args, **kwargs)
 
     @staticmethod
     def __get_fields_list(obj):

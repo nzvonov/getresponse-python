@@ -20,8 +20,8 @@ class Contact(Entity):
         self.scoring = None
         self.engagement_score = None
 
-    def __repr__(self):
-        return super(Contact, self).__repr__() + ", email='{}')>".format(self.email)
+    def __unicode__(self, *args, **kwargs):
+        return super(Contact, self).__unicode__(email=self.email)
 
 
 class ContactManager(EntityManager):

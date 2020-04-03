@@ -17,8 +17,8 @@ class Campaign(Entity):
         self.opting_types = None
         self.subscription_notifications = None
 
-    def __repr__(self):
-        return super(Campaign, self).__repr__() + ", is_default='{}')>".format(self.is_default)
+    def __unicode__(self, *args, **kwargs):
+        return super(Campaign, self).__unicode__(is_default=self.is_default)
 
 
 class CampaignManager(EntityManager):

@@ -14,9 +14,6 @@ class CustomField(Entity):
         self.values = None
         self.format = None
 
-    def __repr__(self):
-        return super(CustomField, self).__repr__() + ")>"
-
 
 class CustomFieldManager(EntityManager):
 

@@ -25,8 +25,8 @@ class Account(Entity):
     def get_name(self):
         return '{} {}'.format(self.first_name or '', self.last_name or '')
 
-    def __repr__(self):
-        return super(Account, self).__repr__() + ", email='{}')>".format(self.email)
+    def __unicode__(self, *args, **kwargs):
+        return super(Account, self).__unicode__(email=self.email)
 
 
 class AccountManager(EntityManager):
