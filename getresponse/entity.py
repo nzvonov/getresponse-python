@@ -51,21 +51,9 @@ class EntityManager(object):
                 kwargs_field = ''.join(split_field[:1] + titled_words)
             yield obj_field, kwargs_field
 
-    def create(self, obj):
-        if isinstance(obj, list):
-            _list = []
-            for item in obj:
-                entity = self._create(**item)
-                _list.append(entity)
-            return _list
-
-        entity = self._create(**obj)
-        return entity
-
     def _create(self, *args, **kwargs):
         entity_id = kwargs.get(self.id_field_in_kwargs)
         entity = self.object_class(_id=entity_id)
-
         for obj_field, kwargs_field in self.__get_fields_list(entity):
             field_data = kwargs.get(kwargs_field)
             if field_data is not None:
@@ -75,3 +63,10 @@ class EntityManager(object):
                     field_data = field_data == 'true'
             setattr(entity, obj_field, field_data)
         return entity
+
+    def create(self, obj):
+        if isinstance(obj, list):
+            for item in obj:
+                yield self._create(**item)
+        else:
+            yield self._create(**obj)
