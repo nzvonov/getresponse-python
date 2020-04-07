@@ -4,8 +4,11 @@ from __future__ import unicode_literals
 
 class BaseGetResponseError(Exception):
     def __init__(self, message, response, *args, **kwargs):
-        super(BaseGetResponseError).__init__(message, *args, **kwargs)
+        self.message = message.encode(encoding='utf-8', errors='strict')
         self.response = response
+
+    def __str__(self):
+        return repr(self.message)
 
 
 class UniquePropertyError(BaseGetResponseError):

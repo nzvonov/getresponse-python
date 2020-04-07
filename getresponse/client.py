@@ -18,20 +18,88 @@ logger = logging.getLogger(__name__)
 
 class GetResponse(object):
     API_BASE_URL = 'https://api.getresponse.com/v3'
+    ERRORS = {
+        1000: ValidationError,
+        1001: NotFoundError,
+        1002: ForbiddenError,
+        1008: UniquePropertyError,
+    }
 
     def __init__(self, api_key, timeout=8):
         self.api_key = api_key
         self.timeout = timeout
-        self.session = requests.Session()
+
         self.account_manager = AccountManager()
         self.campaign_manager = CampaignManager()
         self.contact_manager = ContactManager(self.campaign_manager)
         self.custom_field_manager = CustomFieldManager()
 
+        self.managers = {
+            ObjType.ACCOUNT: self.account_manager,
+            ObjType.CAMPAIGN: self.campaign_manager,
+            ObjType.CONTACT: self.contact_manager,
+            ObjType.CUSTOM_FIELD: self.custom_field_manager,
+        }
+
+        self.session = requests.Session()
         self.session.headers.update({
             'X-Auth-Token': 'api-key {}'.format(self.api_key),
             'Content-Type': 'application/json'
         })
+
+    def _request(self, api_method, obj_type, http_method=HttpMethod.GET, body=None, payload=None):
+        request_data = {
+            'url': self.API_BASE_URL + api_method,
+            'params': payload,
+            'timeout': self.timeout,
+        }
+
+        http_func = http_method.name.lower()
+        if http_method == HttpMethod.POST:
+            request_data['json'] = body
+
+        if http_func is not None:
+            response = getattr(self.session, http_func)(**request_data)
+            logger.debug("\"%s %s\" %s", http_method.name, response.url, response.status_code)
+            response_process_func = '_' + http_func
+
+            return getattr(self, response_process_func)(response, obj_type)
+
+    def _get(self, response, obj_type, *args, **kwargs):
+        if response.status_code != requests.codes.ok:
+            return None
+
+        return self._create_obj(obj_type, response.json())
+
+    def _post(self, response, obj_type, *args, **kwargs):
+        if response.status_code in (requests.codes.bad_request, requests.codes.conflict):
+            error_data = response.json()
+            error_code = error_data.get('code')
+            error_message = error_data.get('message')
+            error_class = self.ERRORS.get(error_code)
+            if error_class is not None:
+                raise error_class(message=error_message, response=error_data)
+            raise Exception(error_message)
+        if response.status_code == requests.codes.accepted:
+            return True
+
+        return self._create_obj(obj_type, response.json())
+
+    def _delete(self, response, *args, **kwargs):
+        if response.status_code == requests.codes.no_content:
+            return True
+
+        return None
+
+    def _create_obj(self, obj_type, data):
+        manager = self.managers.get(obj_type)
+        if manager is None:
+            return data
+
+        method = 'create_list' if isinstance(data, list) else 'create'
+        create_func = getattr(manager, method)
+
+        return create_func(data) if method == 'create_list' else create_func(**data)
 
     def accounts(self, params=None):
         """Retrieves account information
@@ -344,65 +412,6 @@ class GetResponse(object):
 
     def get_billing_info(self):
         return NotImplementedError
-
-    def _request(self, api_method, obj_type, http_method=HttpMethod.GET, body=None, payload=None):
-        if http_method == HttpMethod.GET:
-            response = self.session.get(
-                self.API_BASE_URL + api_method, params=payload, timeout=self.timeout)
-            logger.debug("\"%s %s\" %s", http_method.name, response.url, response.status_code)
-            if response.status_code != 200:
-                return None
-            return self._create_obj(obj_type, response.json())
-
-        if http_method == HttpMethod.POST:
-            response = self.session.post(
-                self.API_BASE_URL + api_method, json=body, params=payload, timeout=self.timeout)
-            logger.debug("\"%s %s\" %s", http_method.name, response.url, response.status_code)
-            if response.status_code == 400 or response.status_code == 409:
-                error = response.json()
-                if error['code'] == 1000:
-                    raise ValidationError(error['message'], response=error)
-                if error['code'] == 1001:
-                    raise NotFoundError(error['message'], response=error)
-                if error['code'] == 1002:
-                    raise ForbiddenError(error['message'], response=error)
-                if error['code'] == 1008:
-                    raise UniquePropertyError(error['message'], response=error)
-                raise Exception(error['message'])
-            if response.status_code == 202:
-                # Respuesta exitosa para un objeto que no se crea inmediatamente.
-                return True
-            return self._create_obj(obj_type, response.json())
-
-        if http_method == HttpMethod.DELETE:
-            response = self.session.delete(
-                self.API_BASE_URL + api_method, params=payload, timeout=self.timeout)
-            logger.debug("\"%s %s\" %s", http_method.name, response.url, response.status_code)
-            if response.status_code == 204:
-                # Respuesta exitosa para un objeto que no se borra inmediatamente.
-                return True
-            return None
-
-    def _create_obj(self, obj_type, data):
-        method = 'create'
-        if isinstance(data, list):
-            method = 'create_list'
-        managers = {
-            ObjType.ACCOUNT: self.account_manager,
-            ObjType.CAMPAIGN: self.campaign_manager,
-            ObjType.CONTACT: self.contact_manager,
-            ObjType.CUSTOM_FIELD: self.custom_field_manager,
-        }
-        manager = managers.get(obj_type)
-
-        if manager is None:
-            return data
-
-        create_func = getattr(manager, method)
-        if method == 'create_list':
-            return create_func(data)
-
-        return create_func(**data)
 
 
 class GetResponseEnterprise(GetResponse):
