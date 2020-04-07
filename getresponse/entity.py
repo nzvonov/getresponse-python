@@ -7,6 +7,8 @@ from dateutil.parser import parse as parse_date
 
 from six import text_type
 
+from .utils import snake_to_camel
+
 
 class Entity(object):
     def __init__(self, _id, *args, **kwargs):
@@ -42,14 +44,8 @@ class EntityManager(object):
     def __get_fields_list(obj):
         obj_fields_list = obj.__dict__.keys()
         obj_fields_list.remove('id')
-        splitter = '_'
         for obj_field in obj_fields_list:
-            kwargs_field = obj_field
-            if splitter in obj_field:
-                split_field = obj_field.split(splitter)
-                titled_words = map(lambda word: word.title(), split_field[1:])
-                kwargs_field = ''.join(split_field[:1] + titled_words)
-            yield obj_field, kwargs_field
+            yield obj_field, snake_to_camel(obj_field)
 
     def _create(self, *args, **kwargs):
         entity_id = kwargs.get(self.id_field_in_kwargs)
