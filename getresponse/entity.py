@@ -37,8 +37,8 @@ class EntityManager(object):
 
     object_class = Entity
     id_field_in_kwargs = None
-    date_fields_in_kwargs = []
-    bool_fields_in_kwargs = []
+    date_fields_in_kwargs = ()
+    bool_fields_in_kwargs = ()
 
     @staticmethod
     def __get_fields_list(obj):

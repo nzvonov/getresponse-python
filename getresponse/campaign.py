@@ -25,5 +25,5 @@ class CampaignManager(EntityManager):
 
     object_class = Campaign
     id_field_in_kwargs = 'campaignId'
-    date_fields_in_kwargs = ['createdOn']
-    bool_fields_in_kwargs = ['isDefault']
+    date_fields_in_kwargs = ('createdOn', )
+    bool_fields_in_kwargs = ('isDefault', )

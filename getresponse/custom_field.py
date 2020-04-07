@@ -19,4 +19,4 @@ class CustomFieldManager(EntityManager):
 
     object_class = CustomField
     id_field_in_kwargs = 'customFieldId'
-    bool_fields_in_kwargs = ['hidden']
+    bool_fields_in_kwargs = ('hidden', )

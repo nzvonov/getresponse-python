@@ -28,7 +28,7 @@ class ContactManager(EntityManager):
 
     object_class = Contact
     id_field_in_kwargs = 'contactId'
-    date_fields_in_kwargs = ['createdOn', 'changedOn']
+    date_fields_in_kwargs = ('createdOn', 'changedOn', )
 
     def __init__(self, campaign_manager, *args, **kwargs):
         super(ContactManager, self).__init__(*args, **kwargs)
