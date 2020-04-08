@@ -18,7 +18,14 @@ logger = logging.getLogger(__name__)
 
 class GetResponse(object):
     API_BASE_URL = 'https://api.getresponse.com/v3'
-    ERRORS = {
+
+    # TODO: добавить обработки ошибок https://apidocs.getresponse.com/v3/errors
+    HTTP_ERRORS = (
+        requests.codes.bad_request,
+        requests.codes.conflict
+    )
+
+    GR_ERRORS = {
         1000: ValidationError,
         1001: NotFoundError,
         1002: ForbiddenError,
@@ -47,7 +54,17 @@ class GetResponse(object):
             'Content-Type': 'application/json'
         })
 
-    def _request(self, api_method, obj_type, http_method=HttpMethod.GET, body=None, payload=None):
+    def __check_response(self, response):
+        if response.status_code in self.HTTP_ERRORS:
+            error_data = response.json()
+            error_code = error_data.get('code')
+            error_message = error_data.get('message')
+            error_class = self.GR_ERRORS.get(error_code)
+            if error_class is not None:
+                raise error_class(message=error_message, response=error_data)
+            raise Exception(error_message)
+
+    def _request(self, api_method, obj_type=None, http_method=HttpMethod.GET, body=None, payload=None):
         request_data = {
             'url': self.API_BASE_URL + api_method,
             'params': payload,
@@ -62,7 +79,7 @@ class GetResponse(object):
             response = getattr(self.session, http_func)(**request_data)
             logger.debug("\"%s %s\" %s", http_method.name, response.url, response.status_code)
             response_process_func = '_' + http_func
-
+            self.__check_response(response)
             return getattr(self, response_process_func)(response, obj_type)
 
     def _get(self, response, obj_type, *args, **kwargs):
@@ -72,14 +89,6 @@ class GetResponse(object):
         return self._create_obj(obj_type, response.json())
 
     def _post(self, response, obj_type, *args, **kwargs):
-        if response.status_code in (requests.codes.bad_request, requests.codes.conflict):
-            error_data = response.json()
-            error_code = error_data.get('code')
-            error_message = error_data.get('message')
-            error_class = self.ERRORS.get(error_code)
-            if error_class is not None:
-                raise error_class(message=error_message, response=error_data)
-            raise Exception(error_message)
         if response.status_code == requests.codes.accepted:
             return True
 
@@ -223,6 +232,17 @@ class GetResponse(object):
             list: Contact
         """
         return self._request('/campaigns/{}/contacts'.format(campaign_id), ObjType.CONTACT, payload=params)
+
+    def get_campaign_size_statistics(self, campaign_id, params=None):
+        """
+        TODO: Дописать описание и переделать формирование параметров
+        """
+        if params is None:
+            params = {
+                'query[campaignId]': campaign_id,
+                'query[createdOn][from]': '2020-04-08',
+            }
+        return self._request('/campaigns/statistics/list-size'.format(campaign_id), payload=params)
 
     def get_contacts(self, params=None):
         """Retrieve contacts from all campaigns
