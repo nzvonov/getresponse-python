@@ -8,7 +8,7 @@ def read(fname):
 
 
 setup(name='getresponse-python',
-      version='0.1.2',
+      version='0.2.0',
       description='Email Marketing Software',
       long_description=read('README.md'),
       long_description_content_type="text/markdown",
