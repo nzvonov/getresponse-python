@@ -286,8 +286,21 @@ class GetResponse(object):
         return self._request('/campaigns/{}/contacts'.format(campaign_id), ObjType.CONTACT, payload=params)
 
     def get_campaign_size_statistics(self, campaign_id, params=None):
-        """
-        TODO: Дописать описание и переделать формирование параметров
+        """Returns the number of the total added and removed subscribers,
+        grouped by default or by time period.
+
+        Args:
+            campaign_id: ID of the campaign
+
+            params:
+                query: Used to search only resources that meets criteria.
+                You can specify multiple parameters, then it uses AND logic.
+
+        Examples:
+            get_campaign_size_statistics("123", {"query": {"groupBy": "hour"}})
+
+        Returns:
+            list: dicts
         """
         request_url = '/campaigns/statistics/list-size/?query[campaignId]={}'.format(campaign_id)
         return self._request(request_url, payload=params)
