@@ -11,7 +11,19 @@ class BaseGetResponseError(Exception):
         return repr(self.message)
 
 
-class UniquePropertyError(BaseGetResponseError):
+class AuthenticationError(BaseGetResponseError):
+    pass
+
+
+class ExternalError(BaseGetResponseError):
+    pass
+
+
+class ForbiddenError(BaseGetResponseError):
+    pass
+
+
+class ManyRequestsError(BaseGetResponseError):
     pass
 
 
@@ -19,9 +31,9 @@ class NotFoundError(BaseGetResponseError):
     pass
 
 
-class ValidationError(BaseGetResponseError):
+class UniquePropertyError(BaseGetResponseError):
     pass
 
 
-class ForbiddenError(BaseGetResponseError):
+class ValidationError(BaseGetResponseError):
     pass

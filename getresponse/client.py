@@ -11,7 +11,15 @@ from .account import AccountManager
 from .campaign import CampaignManager
 from .contact import ContactManager
 from .custom_field import CustomFieldManager
-from .excs import ForbiddenError, NotFoundError, UniquePropertyError, ValidationError
+from .excs import (
+    AuthenticationError,
+    ExternalError,
+    ForbiddenError,
+    ManyRequestsError,
+    NotFoundError,
+    UniquePropertyError,
+    ValidationError
+)
 
 logger = logging.getLogger(__name__)
 
@@ -19,17 +27,33 @@ logger = logging.getLogger(__name__)
 class GetResponse(object):
     API_BASE_URL = 'https://api.getresponse.com/v3'
 
-    # TODO: добавить обработки ошибок https://apidocs.getresponse.com/v3/errors
+    PREPARE_PARAMS_FIELDS = ('query', 'sort')
+
     HTTP_ERRORS = (
-        requests.codes.bad_request,
-        requests.codes.conflict
+        requests.codes.bad_request,  # 400
+        requests.codes.unauthorized,  # 401
+        requests.codes.forbidden,  # 401
+        requests.codes.not_found,  # 404
+        requests.codes.conflict,  # 409
+        requests.codes.too_many_requests,  # 429
     )
 
+    GR_CODE_UNIQUE_ERRORS = (1008,)
+    GR_CODE_EXTERNAL_ERRORS = (1010,)
+    GR_CODE_AUTHENTICATION_ERRORS = (1014,)
+    GR_CODE_NOTFOUND_ERRORS = (1001, 1013,)
+    GR_CODE_MANY_REQUESTS_ERRORS = (1015, 1016,)
+    GR_CODE_FORBIDDEN_ERRORS = (1002, 1009, 1017, 1018, 1023,)
+    GR_CODE_VALIDATION_ERRORS = (1000, 1003, 1004, 1005, 1006, 1007, 1011, 1012, 1021,)
+
     GR_ERRORS = {
-        1000: ValidationError,
-        1001: NotFoundError,
-        1002: ForbiddenError,
-        1008: UniquePropertyError,
+        GR_CODE_UNIQUE_ERRORS: UniquePropertyError,
+        GR_CODE_EXTERNAL_ERRORS: ExternalError,
+        GR_CODE_AUTHENTICATION_ERRORS: AuthenticationError,
+        GR_CODE_NOTFOUND_ERRORS: NotFoundError,
+        GR_CODE_MANY_REQUESTS_ERRORS: ManyRequestsError,
+        GR_CODE_FORBIDDEN_ERRORS: ForbiddenError,
+        GR_CODE_VALIDATION_ERRORS: ValidationError,
     }
 
     def __init__(self, api_key, timeout=8):
@@ -54,17 +78,45 @@ class GetResponse(object):
             'Content-Type': 'application/json'
         })
 
+    @classmethod
+    def __prepare_params(cls, params):
+
+        def prepare_key_and_value(key, value):
+            key = '[{}]'.format(key)
+            if isinstance(value, dict):
+                list_ = []
+                for deep_key, deep_value in value.items():
+                    for deep_key, deep_value in prepare_key_and_value(deep_key, deep_value):
+                        list_.append((key + deep_key, deep_value))
+                return list_
+
+            return [(key, value)]
+
+        for field in cls.PREPARE_PARAMS_FIELDS:
+            field_data = params.get(field)
+            if field_data is not None:
+                del params[field]
+                for key, value in field_data.items():
+                    for param_key, param_value in prepare_key_and_value(key, value):
+                        param_key = '{}{}'.format(field, param_key)
+                        params[param_key] = param_value
+
+        return params
+
     def __check_response(self, response):
         if response.status_code in self.HTTP_ERRORS:
             error_data = response.json()
             error_code = error_data.get('code')
             error_message = error_data.get('message')
-            error_class = self.GR_ERRORS.get(error_code)
-            if error_class is not None:
-                raise error_class(message=error_message, response=error_data)
+            for error_code_tuple, error_class in self.GR_ERRORS.items():
+                if error_code in error_code_tuple:
+                    raise error_class(message=error_message, response=error_data)
             raise Exception(error_message)
 
     def _request(self, api_method, obj_type=None, http_method=HttpMethod.GET, body=None, payload=None):
+        if payload is not None:
+            payload = self.__prepare_params(payload)
+
         request_data = {
             'url': self.API_BASE_URL + api_method,
             'params': payload,
@@ -237,12 +289,8 @@ class GetResponse(object):
         """
         TODO: Дописать описание и переделать формирование параметров
         """
-        if params is None:
-            params = {
-                'query[campaignId]': campaign_id,
-                'query[createdOn][from]': '2020-04-08',
-            }
-        return self._request('/campaigns/statistics/list-size'.format(campaign_id), payload=params)
+        request_url = '/campaigns/statistics/list-size/?query[campaignId]={}'.format(campaign_id)
+        return self._request(request_url, payload=params)
 
     def get_contacts(self, params=None):
         """Retrieve contacts from all campaigns
