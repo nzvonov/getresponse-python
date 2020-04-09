@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 class GetResponse(object):
     API_BASE_URL = 'https://api.getresponse.com/v3'
 
-    PREPARE_PARAMS_FIELDS = ('query', 'sort')
+    PREPARE_PARAMS_FIELDS = ('query', 'sort', 'fields',)
 
     HTTP_ERRORS = (
         requests.codes.bad_request,  # 400
@@ -96,10 +96,13 @@ class GetResponse(object):
             field_data = params.get(field)
             if field_data is not None:
                 del params[field]
-                for key, value in field_data.items():
-                    for param_key, param_value in prepare_key_and_value(key, value):
-                        param_key = '{}{}'.format(field, param_key)
-                        params[param_key] = param_value
+                if field == 'fields':
+                    params[field] = ','.join(field_data)
+                else:
+                    for key, value in field_data.items():
+                        for param_key, param_value in prepare_key_and_value(key, value):
+                            param_key = '{}{}'.format(field, param_key)
+                            params[param_key] = param_value
 
         return params
 
