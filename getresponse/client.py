@@ -25,6 +25,9 @@ logger = logging.getLogger(__name__)
 
 
 class GetResponse(object):
+    DEFAULT_PAGE = 1
+    MAX_DATA_SIZE_LIMIT = 1000
+
     API_BASE_URL = 'https://api.getresponse.com/v3'
 
     PREPARE_PARAMS_FIELDS = ('query', 'sort', 'fields',)
