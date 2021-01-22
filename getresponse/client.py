@@ -88,7 +88,7 @@ class GetResponse(object):
             key = '[{}]'.format(key)
             if isinstance(value, dict):
                 list_ = []
-                for deep_key, deep_value in value.items():
+                for deep_key, deep_value in list(value.items()):
                     for deep_key, deep_value in prepare_key_and_value(deep_key, deep_value):
                         list_.append((key + deep_key, deep_value))
                 return list_
@@ -102,7 +102,7 @@ class GetResponse(object):
                 if field == 'fields':
                     params[field] = ','.join(field_data)
                 else:
-                    for key, value in field_data.items():
+                    for key, value in list(field_data.items()):
                         for param_key, param_value in prepare_key_and_value(key, value):
                             param_key = '{}{}'.format(field, param_key)
                             params[param_key] = param_value
@@ -114,7 +114,7 @@ class GetResponse(object):
             error_data = response.json()
             error_code = error_data.get('code')
             error_message = error_data.get('message')
-            for error_code_tuple, error_class in self.GR_ERRORS.items():
+            for error_code_tuple, error_class in list(self.GR_ERRORS.items()):
                 if error_code in error_code_tuple:
                     raise error_class(message=error_message, response=error_data)
             raise Exception(error_message)

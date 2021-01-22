@@ -19,7 +19,7 @@ class Entity(object):
     def __unicode__(self, *args, **kwargs):
         params = OrderedDict({'id': self.id, 'name': self.get_name()})
         params.update(kwargs)
-        format_str = map(lambda param: "{}='{}'".format(param[0], param[1]), params.items())
+        format_str = ["{}='{}'".format(param[0], param[1]) for param in list(params.items())]
         return ", ".join(format_str)
 
     def __repr__(self):
@@ -42,7 +42,7 @@ class EntityManager(object):
 
     @staticmethod
     def __get_fields_list(obj):
-        obj_fields_list = obj.__dict__.keys()
+        obj_fields_list = list(obj.__dict__.keys())
         obj_fields_list.remove('id')
         for obj_field in obj_fields_list:
             yield obj_field, snake_to_camel(obj_field)

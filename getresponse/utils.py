@@ -10,6 +10,6 @@ def snake_to_camel(snake_string):
     """
     splitter = '_'
     split_field = snake_string.split(splitter)
-    titled_words = map(lambda word: word.title(), split_field[1:])
+    titled_words = [word.title() for word in split_field[1:]]
     camel_string = ''.join(split_field[:1] + titled_words)
     return camel_string
