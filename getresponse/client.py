@@ -1,17 +1,14 @@
 # -*- encoding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
-
-from getresponse.enums import HttpMethod, ObjType
 
 import requests
 
-from .account import AccountManager
-from .campaign import CampaignManager
-from .contact import ContactManager
-from .custom_field import CustomFieldManager
-from .excs import (
+from getresponse.account import AccountManager
+from getresponse.campaign import CampaignManager
+from getresponse.contact import ContactManager
+from getresponse.custom_field import CustomFieldManager
+from getresponse.enums import HttpMethod, ObjType
+from getresponse.excs import (
     AuthenticationError,
     ExternalError,
     ForbiddenError,

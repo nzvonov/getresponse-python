@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-from __future__ import unicode_literals
-
 from collections import OrderedDict
 
 from dateutil.parser import parse as parse_date
