@@ -1,8 +1,6 @@
 # -*- encoding: utf-8 -*-
 import logging
 
-import requests
-
 from getresponse.account import AccountManager
 from getresponse.campaign import CampaignManager
 from getresponse.contact import ContactManager
@@ -17,6 +15,9 @@ from getresponse.excs import (
     UniquePropertyError,
     ValidationError
 )
+
+import requests
+
 
 logger = logging.getLogger(__name__)
 
