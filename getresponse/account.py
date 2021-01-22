@@ -4,7 +4,7 @@ from getresponse.entity import Entity, EntityManager
 
 class Account(Entity):
     def __init__(self, *args, **kwargs):
-        super(Account, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.first_name = None
         self.last_name = None
         self.email = None
@@ -21,10 +21,10 @@ class Account(Entity):
         self.time_zone = None
 
     def __unicode__(self, *args, **kwargs):
-        return super(Account, self).__unicode__(email=self.email)
+        return super().__unicode__(email=self.email)
 
     def get_name(self):
-        return '{} {}'.format(self.first_name or '', self.last_name or '')
+        return '{0} {1}'.format(self.first_name or '', self.last_name or '')
 
 
 class AccountManager(EntityManager):

@@ -4,7 +4,7 @@ from getresponse.entity import Entity, EntityManager
 
 class Campaign(Entity):
     def __init__(self, *args, **kwargs):
-        super(Campaign, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.language_code = None
         self.is_default = None
         self.created_on = None
@@ -16,7 +16,7 @@ class Campaign(Entity):
         self.subscription_notifications = None
 
     def __unicode__(self, *args, **kwargs):
-        return super(Campaign, self).__unicode__(is_default=self.is_default)
+        return super().__unicode__(is_default=self.is_default)
 
 
 class CampaignManager(EntityManager):

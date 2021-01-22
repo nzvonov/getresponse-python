@@ -4,7 +4,7 @@ from getresponse.entity import Entity, EntityManager
 
 class CustomField(Entity):
     def __init__(self, *args, **kwargs):
-        super(CustomField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.field_type = None
         self.value_type = None
         self.type = None

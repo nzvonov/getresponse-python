@@ -2,37 +2,38 @@
 from collections import OrderedDict
 
 from dateutil.parser import parse as parse_date
-
 from six import text_type
 
-from .utils import snake_to_camel
+from getresponse.utils import snake_to_camel
 
 
-class Entity(object):
+class Entity:
     def __init__(self, _id, *args, **kwargs):
         self.id = _id
         self.name = None
         self.href = None
 
+    def __str__(self, *args, **kwargs):
+        return self.__unicode__(*args, **kwargs)
+
     def __unicode__(self, *args, **kwargs):
         params = OrderedDict({'id': self.id, 'name': self.get_name()})
         params.update(kwargs)
-        format_str = ["{}='{}'".format(param[0], param[1]) for param in list(params.items())]
-        return ", ".join(format_str)
+        format_str = ["{0}='{1}'".format(param_key, param_value) for param_key, param_value in list(params.items())]
+        return ', '.join(format_str)
 
     def __repr__(self):
         try:
             obj_str = text_type(self)
         except (UnicodeEncodeError, UnicodeDecodeError):
             obj_str = '[Bad Unicode data]'
-        return '<{}({})>'.format(self.__class__.__name__, obj_str).encode(encoding='utf-8', errors='strict')
+        return '<{0}({1})>'.format(self.__class__.__name__, obj_str).encode(encoding='utf-8', errors='strict')
 
     def get_name(self):
         return self.name
 
 
-class EntityManager(object):
-
+class EntityManager:
     object_class = Entity
     id_field_in_kwargs = None
     date_fields_in_kwargs = ()
