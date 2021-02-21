@@ -1,6 +1,6 @@
 # getresponse
 
-getresponse is an API wrapper for [GetResponse](https://apireference.getresponse.com/) written in Python 2.
+getresponse is an API wrapper for [GetResponse](https://apireference.getresponse.com/) written in Python 3.
 
 ## Installing
 
